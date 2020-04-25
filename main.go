@@ -14,7 +14,7 @@ func main() {
 	wg := &sync.WaitGroup{}
 	defer wg.Wait()
 
-	fmt.Println("TCP server started . . .")
+	fmt.Println("* * * TCP server started * * *")
 
 	wg.Add(1)
 	go handleListener(wg)
@@ -48,7 +48,6 @@ func handleConn(conn net.Conn, wg *sync.WaitGroup) {
 	defer conn.Close()
 
 	msg, _ := bufio.NewReader(conn).ReadString('\n')
-	//conn.Write([]byte("heeeeyyyyyyyyyyyy!!!!!"))
 
 	fmt.Println(msg)
 }
