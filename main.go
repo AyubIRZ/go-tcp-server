@@ -32,11 +32,11 @@ func handleListener(wg *sync.WaitGroup) {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Println("TCP conn failed: ", err)
+			log.Println("TCP connection failed: ", err)
 			continue
 		}
 
-		fmt.Println("New conn accepted! ", conn.RemoteAddr())
+		fmt.Println("New connection accepted! ", conn.RemoteAddr())
 
 		wg.Add(1)
 		go handleConn(conn, wg)
@@ -45,9 +45,16 @@ func handleListener(wg *sync.WaitGroup) {
 
 func handleConn(conn net.Conn, wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer conn.Close()
 
-	msg, _ := bufio.NewReader(conn).ReadString('\n')
-
-	fmt.Println(msg)
+	buf := bufio.NewReader(conn)
+	for {
+		msg, err := buf.ReadString('\n')
+		if err != nil {
+			log.Println("TCP connection read failed: ", err)
+			break
+		}
+		fmt.Println("<client>: ", msg)
+		_, _ = fmt.Fprint(conn, "Hi from TCP server :)\n")
+	}
+	_ = conn.Close()
 }
