@@ -15,6 +15,16 @@ type Sessions struct {
 }
 
 
+// Init creates a new object of Sessions struct and returns the pointer of it to be used by its receiver methods.
+func Init() *Sessions{
+	s := Sessions{
+		locker: sync.RWMutex{},
+		conns:  map[ConnID]net.Conn{},
+	}
+
+	return &s
+}
+
 // AddConn adds a new connection to the sessions map.
 func (s *Sessions) AddConn(uniqueID ConnID, conn net.Conn) error {
 	s.locker.RLock()
