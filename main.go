@@ -80,13 +80,14 @@ func handleConn(conn net.Conn, wg *sync.WaitGroup, sessions *session.Sessions) {
 		_, _ = fmt.Fprintln(conn, errorIDExists)
 		return
 	}
+	defer sessions.DeleteConn(connID)
 	_, _ = fmt.Fprintln(conn, infoConnSuccessful)
 
 	for {
 		msg, err = buf.ReadString('\n')
 		if err != nil {
 			log.Println("TCP connection read failed: ", err)
-			break
+			return
 		}
 		fmt.Println("<client>: ", msg)
 		_, _ = fmt.Fprintln(conn, "Hi from TCP server :)")
