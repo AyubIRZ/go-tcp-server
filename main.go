@@ -67,7 +67,8 @@ func handleConn(conn net.Conn, wg *sync.WaitGroup, sessions *session.Sessions) {
 
 	msg, err := buf.ReadString('\n')
 	if err != nil {
-		log.Fatal("TCP connection read failed: ", err)
+		log.Println("TCP connection read failed: ", err)
+		return
 	}
 
 	if msg[:len(authDelimiter)] != authDelimiter{
@@ -90,6 +91,9 @@ func handleConn(conn net.Conn, wg *sync.WaitGroup, sessions *session.Sessions) {
 			return
 		}
 		fmt.Println("<client>: ", msg)
-		_, _ = fmt.Fprintln(conn, "Hi from TCP server :)")
+		_, err = fmt.Fprintln(conn, "Hi from TCP server :)")
+		if err != nil {
+			fmt.Println("some write error: ", err.Error())
+		}
 	}
 }
