@@ -6,6 +6,7 @@ import (
 	"github.com/ayubirz/go-tcp-server/pkg/session"
 	"log"
 	"net"
+	"net/url"
 	"sync"
 )
 
@@ -70,6 +71,7 @@ func handleConn(conn net.Conn, wg *sync.WaitGroup, sessions *session.Sessions) {
 		log.Println("TCP connection read failed: ", err)
 		return
 	}
+	msg, _ = url.QueryUnescape(msg)
 
 	if msg[:len(authDelimiter)] != authDelimiter{
 		_, _ = fmt.Fprintln(conn, errorIDNotSpecified)
@@ -90,6 +92,9 @@ func handleConn(conn net.Conn, wg *sync.WaitGroup, sessions *session.Sessions) {
 			log.Println("TCP connection read failed: ", err)
 			return
 		}
+
+		msg, _ = url.QueryUnescape(msg)
+
 		fmt.Println("<client>: ", msg)
 		_, err = fmt.Fprintln(conn, "Hi from TCP server :)")
 		if err != nil {
