@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net"
 	"sync"
+	"github.com/google/uuid"
 )
 
 type ConnID string
@@ -26,32 +27,33 @@ func Init() *Sessions{
 }
 
 // AddConn adds a new connection to the sessions map.
-func (s *Sessions) AddConn(uniqueID ConnID, conn net.Conn) error {
+func (s *Sessions) AddConn(conn net.Conn) (ConnID, error) {
 	s.locker.RLock()
+	uniqueID := uuid.NewRandom().String()
 	_, ok := s.conns[uniqueID]
 	s.locker.RUnlock()
 	if ok {
-		return errors.New("ID already exists in the connections.")
+		return "", errors.New("ID already exists in the connections.")
 	}
 
 	s.locker.Lock()
 	s.conns[uniqueID] = conn
 	s.locker.Unlock()
 
-	return nil
+	return uniqueID, nil
 }
 
 
 // GetConn returns a TCP connection based on a given ID, or error if the given ID doesn't exist in the map.
 func (s *Sessions) GetConn(uniqueID ConnID) (net.Conn, error) {
 	s.locker.RLock()
-	v, ok := s.conns[uniqueID]
+	conn, ok := s.conns[uniqueID]
 	s.locker.RUnlock()
 	if !ok {
 		return nil, errors.New("Requested TCP connection doesn't exist.")
 	}
 
-	return v, nil
+	return conn, nil
 }
 
 
