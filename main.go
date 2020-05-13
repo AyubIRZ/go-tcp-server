@@ -20,7 +20,6 @@ const (
 // All TCP conn related errors are defined here.
 const (
 	errorIDExists 		= "ERROR_ID_EXISTS"
-	errorIDNotSpecified = "ERROR_ID_NOT_SPECIFIED"
 )
 
 func main() {
@@ -66,20 +65,8 @@ func handleConn(conn net.Conn, wg *sync.WaitGroup, sessions *session.Sessions) {
 
 	buf := bufio.NewReader(conn)
 
-	msg, err := buf.ReadString('\n')
+	connID, err := sessions.AddConn(conn)
 	if err != nil {
-		log.Println("TCP connection read failed: ", err)
-		return
-	}
-	msg, _ = url.QueryUnescape(msg)
-
-	if msg[:len(authDelimiter)] != authDelimiter{
-		_, _ = fmt.Fprintln(conn, errorIDNotSpecified)
-		return
-	}
-
-	connID := session.ConnID(msg[len(authDelimiter) : len(msg)-1])
-	if err := sessions.AddConn(connID, conn); err != nil {
 		_, _ = fmt.Fprintln(conn, errorIDExists)
 		return
 	}
@@ -87,7 +74,7 @@ func handleConn(conn net.Conn, wg *sync.WaitGroup, sessions *session.Sessions) {
 	_, _ = fmt.Fprintln(conn, infoConnSuccessful)
 
 	for {
-		msg, err = buf.ReadString('\n')
+		msg, err := buf.ReadString('\n')
 		if err != nil {
 			log.Println("TCP connection read failed: ", err)
 			return
