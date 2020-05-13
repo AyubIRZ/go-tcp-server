@@ -2,6 +2,7 @@ package session
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"sync"
 	"github.com/google/uuid"
@@ -29,7 +30,12 @@ func Init() *Sessions{
 // AddConn adds a new connection to the sessions map.
 func (s *Sessions) AddConn(conn net.Conn) (ConnID, error) {
 	s.locker.RLock()
-	uniqueID := uuid.NewRandom().String()
+	id, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+
+	uniqueID := ConnID(id.String())
 	_, ok := s.conns[uniqueID]
 	s.locker.RUnlock()
 	if ok {
